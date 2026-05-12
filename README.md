@@ -1,2 +1,1124 @@
-# Cyreles18
-El mejor inventario
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#050a14"/>
+<title>CYRELES INV — Integral de Empaques</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070c1a;color:#ccc;font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0a0f1e}::-webkit-scrollbar-thumb{background:#00e5ff33;border-radius:4px}
+  input,button,select{font-family:'Share Tech Mono',monospace}
+  input:focus{outline:none;border-color:#00e5ff!important;box-shadow:0 0 10px #00e5ff33}
+
+  /* LOGIN */
+  #login-screen{min-height:100vh;background:#050a14;background-image:radial-gradient(ellipse at 50% 50%,#001828 0%,#050a14 70%);display:flex;align-items:center;justify-content:center}
+  .login-card{background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.14);border-radius:22px;padding:42px 34px;text-align:center;max-width:320px;width:92%;animation:fadeUp 0.5s ease}
+  .login-icon{font-size:2.6rem;color:#00e5ff;margin-bottom:8px}
+  .login-title{color:#fff;font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.6rem;letter-spacing:5px}
+  .login-sub{color:#334;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;margin:6px 0 20px}
+  .login-hint{color:#00e5ffaa;font-size:0.78rem;margin-bottom:22px}
+  .pin-dots{display:flex;justify-content:center;gap:20px;margin-bottom:28px}
+  .pin-dot{width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,0.1);transition:all 0.16s}
+  .pin-dot.filled{background:#00e5ff;box-shadow:0 0 16px #00e5ffaa}
+  .pin-dot.error{background:#ff4444;box-shadow:0 0 16px #ff444488}
+  .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;width:222px;margin:0 auto}
+  .pin-key{width:63px;height:63px;border-radius:14px;border:1px solid rgba(0,229,255,0.2);background:rgba(0,229,255,0.07);color:#00e5ff;font-size:1.45rem;font-family:'Orbitron',sans-serif;font-weight:700;cursor:pointer;transition:all 0.15s}
+  .pin-key:hover{background:rgba(0,229,255,0.2);transform:scale(1.1)}
+  .pin-key:active{transform:scale(0.92)}
+  .pin-key.del{border-color:rgba(255,107,107,0.28);background:rgba(255,107,107,0.09);color:#ff6b6b;font-size:1.2rem}
+  .pin-key.empty{opacity:0;pointer-events:none}
+  .pin-error{color:#ff4444;font-size:0.74rem;margin-top:18px;letter-spacing:1px}
+
+  /* APP */
+  #app-screen{display:none;min-height:100vh;flex-direction:column}
+  header{background:rgba(0,229,255,0.04);border-bottom:1px solid rgba(0,229,255,0.1);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+  .header-left{display:flex;align-items:center;gap:11px}
+  .header-icon{font-size:1.8rem;color:#00e5ff}
+  .header-title{color:#fff;font-family:'Orbitron',sans-serif;font-weight:900;font-size:0.88rem;letter-spacing:3px}
+  .header-sub{color:#445;font-size:0.58rem;letter-spacing:1px;margin-top:1px}
+  .header-right{display:flex;align-items:center;gap:10px}
+  .alert-badge{background:rgba(255,68,68,0.15);border:1px solid rgba(255,68,68,0.4);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:5px;animation:glowR 2s infinite;display:none}
+  .alert-badge span{color:#ff4444;font-size:0.65rem;font-weight:bold}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 8px #00e676}
+  .status-txt{color:#00e5ff;font-size:0.65rem}
+
+  nav{display:flex;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.3);overflow-x:auto}
+  .tab-btn{padding:11px 12px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.66rem;letter-spacing:0.5px;white-space:nowrap;color:#556;transition:all 0.2s;position:relative}
+  .tab-btn:hover{background:rgba(0,229,255,0.09)}
+  .tab-btn.active{color:#00e5ff;border-bottom-color:#00e5ff}
+  .tab-badge{position:absolute;top:6px;right:3px;width:7px;height:7px;border-radius:50%;background:#ff4444;box-shadow:0 0 6px #ff4444;display:none}
+
+  main{padding:16px;max-width:900px;margin:0 auto;width:100%}
+  .panel{display:none;animation:fadeIn 0.4s}
+  .panel.active{display:block}
+
+  /* STATS */
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+  .stat-card{background:rgba(255,255,255,0.02);border-radius:12px;padding:16px;text-align:center}
+  .stat-icon{font-size:1.5rem}
+  .stat-val{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.9rem;margin:5px 0 3px}
+  .stat-label{font-size:0.62rem;color:#556;letter-spacing:0.5px}
+
+  /* SECTION TITLE */
+  .sec-title{color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:0.68rem;letter-spacing:3px;margin-bottom:12px;margin-top:4px;border-left:3px solid #00e5ff;padding-left:8px}
+  .sec-title.yellow{color:#ffd600;border-left-color:#ffd600}
+
+  /* BARS */
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .bar-label{color:#aaa;font-size:0.75rem;width:52px}
+  .bar-track{flex:1;height:7px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
+  .bar-info{color:#445;font-size:0.65rem;width:80px;text-align:right}
+
+  /* CHIPS */
+  .chip-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+  .chip{padding:3px 8px;border-radius:5px;border:1px solid;font-size:0.7rem;font-family:'Share Tech Mono',monospace}
+  .chip.yellow{border-color:#ffd60033;background:rgba(255,214,0,0.07);color:#ffd600}
+  .chip.cyan{border-color:#00e5ff33;background:rgba(0,229,255,0.07);color:#00e5ff}
+  .chip.green{border-color:#00e67633;background:rgba(0,230,118,0.08);color:#00e676}
+  .chip.red{border-color:#ff444433;background:rgba(255,68,68,0.1);color:#ff4444}
+
+  /* CODE CHIPS */
+  .code-wrap{display:flex;flex-wrap:wrap;gap:7px}
+  .code-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:5px;border:1px solid rgba(0,229,255,0.15);background:rgba(0,229,255,0.03);font-size:0.73rem;transition:all 0.16s;cursor:default}
+  .code-chip:hover{background:rgba(0,229,255,0.12);transform:scale(1.04)}
+  .code-chip.yellow-chip{border-color:#ffd60033;background:rgba(255,214,0,0.05)}
+  .code-chip.red-chip{border-color:#ff444433;background:rgba(255,68,68,0.06)}
+  .code-chip .code-txt{color:#00e5ff}
+  .code-chip.yellow-chip .code-txt{color:#ffd600}
+  .code-chip.red-chip .code-txt{color:#ff4444}
+  .micro-btn{background:none;border:none;cursor:pointer;font-size:0.8rem;padding:0 1px;line-height:1;transition:all 0.15s}
+  .micro-btn:hover{transform:scale(1.3)}
+  .tag{font-size:0.5rem;padding:1px 3px;border-radius:2px}
+  .tag.imp{background:rgba(255,214,0,0.12);color:#ffd600}
+  .tag.nodb{background:rgba(255,107,107,0.12);color:#ff6b6b}
+  .tag.remp{background:rgba(255,68,68,0.2);color:#ff4444}
+  .tag.pct{color:inherit;font-family:'Share Tech Mono',monospace}
+
+  /* SERIE BLOCK */
+  .serie-block{margin-bottom:18px}
+  .serie-title{font-family:'Orbitron',sans-serif;font-size:0.58rem;letter-spacing:3px;margin-bottom:8px;opacity:0.6}
+  .serie-title.cyan{color:#00e5ff}
+  .serie-title.yellow{color:#ffd600}
+
+  /* TOOLBAR */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px;align-items:center}
+  .inp{background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.2);border-radius:8px;padding:8px 11px;color:#ccc;font-family:'Share Tech Mono',monospace;font-size:0.74rem;transition:all 0.2s}
+  .inp.flex1{flex:1;min-width:90px}
+  .inp.w130{width:130px}
+  .inp.w150{width:150px}
+  .btn{padding:7px 13px;border-radius:7px;border:1px solid rgba(0,229,255,0.3);background:rgba(0,229,255,0.1);color:#00e5ff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+  .btn:hover{filter:brightness(1.25);transform:scale(1.05)}
+  .btn.yellow{border-color:rgba(255,214,0,0.3);background:rgba(255,214,0,0.1);color:#ffd600}
+  .btn.green{border-color:rgba(0,230,118,0.4);background:rgba(0,230,118,0.12);color:#00e676}
+  .btn.red-btn{border-color:rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#ff6b6b}
+
+  /* INSPECCIÓN */
+  .insp-subtabs{display:flex;gap:6px;margin-bottom:14px;background:rgba(255,255,255,0.02);border-radius:10px;padding:4px}
+  .stab{flex:1;padding:7px 5px;border-radius:7px;border:none;background:transparent;color:#556;font-family:'Share Tech Mono',monospace;font-size:0.62rem;cursor:pointer;transition:all 0.2s}
+  .stab:hover{background:rgba(255,255,255,0.06)}
+  .stab.active{background:rgba(0,229,255,0.15);color:#00e5ff}
+
+  .insp-card{background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.12);border-radius:14px;padding:20px;margin-bottom:14px;text-align:center}
+  .insp-card h3{color:#fff;font-family:'Orbitron',sans-serif;font-size:0.82rem;letter-spacing:2px;margin-bottom:6px}
+  .insp-card p{color:#556;font-size:0.72rem;line-height:1.5;margin-bottom:16px}
+
+  .insp-label{color:#00e5ff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;display:block;margin-bottom:6px;text-align:left}
+  .code-row{display:flex;gap:8px;margin-bottom:14px}
+  .photo-btn{width:100%;padding:14px;border-radius:10px;border:1px solid rgba(0,229,255,0.4);background:rgba(0,229,255,0.12);color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:0.78rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px}
+  .photo-btn:hover{filter:brightness(1.2)}
+  .photo-btn:disabled{opacity:0.6;cursor:not-allowed}
+
+  .loading-box{background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.1);border-radius:14px;padding:24px;text-align:center;display:none}
+  .spin{display:inline-block;font-size:2.5rem;color:#00e5ff;animation:spin 1.5s linear infinite}
+  .loading-txt{color:#00e5ff;font-size:0.8rem;margin-top:12px;animation:pulse 1.5s infinite}
+
+  /* RESULTADO INSPECCIÓN */
+  .result-card{border-radius:14px;overflow:hidden;display:none}
+  .result-header{padding:16px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .result-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+  .result-codigo{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .result-codigo-txt{color:#fff;font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900}
+  .result-estado-lbl{font-family:'Orbitron',sans-serif;font-size:0.7rem;letter-spacing:2px}
+  .result-vida-big{text-align:center}
+  .result-vida-num{font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.2rem;line-height:1}
+  .result-vida-sub{color:#556;font-size:0.6rem;margin-top:2px}
+  .vida-bar-wrap{height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden}
+  .vida-bar-fill{height:100%;border-radius:5px;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
+
+  .result-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+  .result-img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;display:none}
+  .damage-box{background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.2);border-radius:8px;padding:10px;display:none}
+  .damage-title{color:#ff6b6b;font-family:'Orbitron',sans-serif;font-size:0.6rem;letter-spacing:2px;margin-bottom:8px}
+  .damage-item{display:flex;gap:6px;margin-bottom:4px;align-items:flex-start}
+  .damage-bullet{color:#ff6b6b;font-size:0.7rem;margin-top:1px}
+  .damage-txt{color:#cc8888;font-size:0.7rem;line-height:1.4}
+  .zones-box{display:none}
+  .zones-title{color:#aaa;font-size:0.62rem;letter-spacing:1px;margin-bottom:6px}
+  .reco-box{background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);border-radius:8px;padding:10px}
+  .reco-title{color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:0.6rem;letter-spacing:2px;margin-bottom:6px}
+  .reco-txt{color:#aab;font-size:0.72rem;line-height:1.5}
+  .obs-box{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;display:none}
+  .obs-title{color:#556;font-size:0.65rem;letter-spacing:1px;margin-bottom:4px}
+  .obs-txt{color:#889;font-size:0.7rem;line-height:1.5}
+  .urgente-box{background:rgba(255,68,68,0.1);border:2px solid rgba(255,68,68,0.5);border-radius:10px;padding:12px;text-align:center;display:none;animation:glowR 2s infinite}
+  .urgente-icon{font-size:1.8rem;margin-bottom:6px}
+  .urgente-title{color:#ff4444;font-family:'Orbitron',sans-serif;font-size:0.75rem;letter-spacing:2px;margin-bottom:4px}
+  .urgente-sub{color:#ff6b6b;font-size:0.68rem}
+  .urgente-note{color:#cc5555;font-size:0.65rem;margin-top:6px}
+  .result-fecha{color:#334;font-size:0.6rem;text-align:right}
+
+  /* HISTORIAL */
+  .hist-item{background:rgba(255,255,255,0.02);border-radius:11px;padding:12px;display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+  .hist-img{width:56px;height:56px;object-fit:cover;border-radius:7px;flex-shrink:0}
+  .hist-info{flex:1;min-width:0}
+  .hist-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .hist-code{color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:0.78rem;font-weight:bold}
+  .hist-vida{font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:bold}
+  .hist-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:5px}
+  .hist-bar-fill{height:100%;border-radius:3px;transition:width 0.8s}
+  .hist-fecha{color:#334;font-size:0.58rem;margin-top:3px}
+  .hist-reemplazado{display:inline-block;margin-top:4px;padding:1px 7px;border-radius:4px;background:rgba(0,230,118,0.12);color:#00e676;font-size:0.58px}
+
+  /* REEMPLAZAR LIST */
+  .remp-item{background:rgba(255,68,68,0.06);border:2px solid rgba(255,68,68,0.35);border-radius:12px;overflow:hidden;margin-bottom:10px;animation:glowR 3s infinite}
+  .remp-header{padding:12px 14px}
+  .remp-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+  .remp-code-wrap{display:flex;align-items:center;gap:8px}
+  .remp-code{color:#fff;font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:900}
+  .remp-urgencia{color:#ff4444;font-size:0.62rem;letter-spacing:1px;margin-top:2px}
+  .remp-vida-big{text-align:center}
+  .remp-vida-num{color:#ff4444;font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.8rem;line-height:1}
+  .remp-vida-sub{color:#556;font-size:0.55rem}
+  .remp-bar{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-bottom:10px}
+  .remp-bar-fill{height:100%;border-radius:4px;background:#ff4444;box-shadow:0 0 10px #ff444488;transition:width 0.8s}
+  .remp-danos{margin-bottom:10px}
+  .remp-footer{display:flex;justify-content:space-between;align-items:center}
+  .remp-fecha{color:#334;font-size:0.58rem}
+
+  /* ALERT BOXES */
+  .alert-remp-box{background:rgba(255,68,68,0.07);border:1px solid rgba(255,68,68,0.3);border-radius:12px;padding:14px;margin-bottom:18px;display:none}
+  .alert-remp-title{color:#ff4444;font-family:'Orbitron',sans-serif;font-size:0.7rem;letter-spacing:2px;margin-bottom:10px}
+  .alert-remp-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .alert-chip{background:rgba(255,68,68,0.12);border:1px solid rgba(255,68,68,0.4);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px}
+  .alert-chip-code{color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:0.8rem;font-weight:bold}
+  .alert-chip-vida{color:#ff6b6b;font-size:0.62rem}
+
+  /* INSP HISTORIAL en dashboard */
+  .last-insp-item{background:rgba(255,255,255,0.02);border-radius:10px;padding:10px 13px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+
+  /* EMPTY STATE */
+  .empty-state{text-align:center;padding:40px 20px;color:#334;font-size:0.8rem}
+
+  /* AI UPDATE */
+  .ai-card{background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.1);border-radius:14px;padding:22px;text-align:center;margin-bottom:12px}
+  .ai-result-box{margin-top:16px;padding:13px;border-radius:9px;border:1px solid rgba(0,230,118,0.3);background:rgba(0,230,118,0.04);text-align:left;display:none}
+
+  /* ANIMATIONS */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}60%{transform:translateX(14px)}}
+  @keyframes glow{0%,100%{box-shadow:0 0 8px #00e5ff22}50%{box-shadow:0 0 22px #00e5ff66}}
+  @keyframes glowR{0%,100%{box-shadow:0 0 8px #ff444422}50%{box-shadow:0 0 22px #ff444466}}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+  .glow-cyan{animation:glow 3s infinite}
+  .glow-red{animation:glowR 3s infinite}
+
+  .error-box{background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.3);border-radius:12px;padding:16px;text-align:center;display:none}
+  .error-txt{color:#ff6b6b;font-size:0.75rem}
+
+  select.inp{cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card" id="login-card">
+    <div class="login-icon">⬡</div>
+    <h1 class="login-title">CYRELES</h1>
+    <p class="login-sub">Integral de Empaques SAS</p>
+    <p class="login-hint">Ingresa tu PIN de 4 dígitos</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key empty" disabled></button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <p class="pin-error" id="pin-error" style="display:none">⚠ PIN incorrecto. Intenta de nuevo.</p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app-screen">
+  <header>
+    <div class="header-left">
+      <span class="header-icon">⬡</span>
+      <div>
+        <div class="header-title">CYRELES INV</div>
+        <div class="header-sub">Integral de Empaques SAS · Área Impresión</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="alert-badge" id="alert-badge">
+        <span>🚨</span><span id="alert-count">0 reemplazar</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="status-dot"></div>
+        <span class="status-txt">EN LÍNEA</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" onclick="showTab('dashboard')">◈ Dashboard</button>
+    <button class="tab-btn" onclick="showTab('inspeccion')">🔬 Inspección<span class="tab-badge" id="insp-badge"></span></button>
+    <button class="tab-btn" onclick="showTab('db')">◎ Base Datos</button>
+    <button class="tab-btn" onclick="showTab('impresion')">⬡ Impresión</button>
+    <button class="tab-btn" onclick="showTab('actualizar')">⟳ Actualizar</button>
+  </nav>
+
+  <main>
+    <!-- ── DASHBOARD ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card glow-cyan" style="border:1px solid #00e5ff33">
+          <div class="stat-icon">◎</div>
+          <div class="stat-val" id="stat-total" style="color:#00e5ff">0</div>
+          <div class="stat-label">Total Base Datos</div>
+        </div>
+        <div class="stat-card glow-cyan" style="border:1px solid #ffd60033">
+          <div class="stat-icon">⬡</div>
+          <div class="stat-val" id="stat-imp" style="color:#ffd600">0</div>
+          <div class="stat-label">En Impresión</div>
+        </div>
+        <div class="stat-card glow-cyan" style="border:1px solid #00e67633">
+          <div class="stat-icon">✓</div>
+          <div class="stat-val" id="stat-disp" style="color:#00e676">0</div>
+          <div class="stat-label">Disponibles</div>
+        </div>
+        <div class="stat-card glow-red" style="border:1px solid #ff444433">
+          <div class="stat-icon">🚨</div>
+          <div class="stat-val" id="stat-remp" style="color:#ff4444">0</div>
+          <div class="stat-label">Para Reemplazar</div>
+        </div>
+      </div>
+
+      <!-- Alertas reemplazo -->
+      <div class="alert-remp-box" id="dash-alert-box">
+        <div class="alert-remp-title">🚨 CYRELES PARA REEMPLAZAR</div>
+        <div class="alert-remp-chips" id="dash-alert-chips"></div>
+      </div>
+
+      <div class="sec-title">Distribución por serie</div>
+      <div id="series-bars"></div>
+
+      <div class="sec-title" style="margin-top:18px" id="last-insp-title" style="display:none">Últimas Inspecciones</div>
+      <div id="last-insp-list"></div>
+    </div>
+
+    <!-- ── INSPECCIÓN ── -->
+    <div class="panel" id="panel-inspeccion">
+      <div class="insp-subtabs">
+        <button class="stab active" onclick="showInspTab('nueva')">Nueva Inspección</button>
+        <button class="stab" id="stab-hist" onclick="showInspTab('historial')">Historial (0)</button>
+        <button class="stab" id="stab-remp" onclick="showInspTab('reemplazar')">🚨 Reemplazar (0)</button>
+      </div>
+
+      <!-- Nueva -->
+      <div id="insp-nueva">
+        <div class="insp-card">
+          <div style="font-size:2rem;margin-bottom:8px">🔬</div>
+          <h3>INSPECCIÓN DE CYREL</h3>
+          <p>Toma una foto del relieve del cyrel.<br>La IA analizará estado, daños y vida útil.</p>
+          <label class="insp-label">CÓDIGO DEL CYREL</label>
+          <div class="code-row">
+            <input class="inp flex1" id="insp-code" placeholder="Ej: A084, B504, C440..."/>
+            <select class="inp" id="insp-select" onchange="document.getElementById('insp-code').value=this.value;this.value=''">
+              <option value="">-- Lista --</option>
+            </select>
+          </div>
+          <input type="file" id="insp-file" accept="image/*" capture="environment" style="display:none" onchange="handleInspPhoto(this)"/>
+          <button class="photo-btn" id="insp-btn" onclick="document.getElementById('insp-file').click()">
+            <span style="font-size:1.3rem">📸</span> Fotografiar Cyrel
+          </button>
+        </div>
+
+        <div class="loading-box" id="insp-loading">
+          <div class="spin">⬡</div>
+          <p class="loading-txt">Analizando estado del cyrel con IA...</p>
+          <p style="color:#334;font-size:0.68rem;margin-top:6px">Evaluando relieve, daños y vida útil</p>
+        </div>
+
+        <div class="error-box" id="insp-error">
+          <div style="font-size:1.5rem;margin-bottom:8px">⚠️</div>
+          <p class="error-txt" id="insp-error-txt"></p>
+        </div>
+
+        <!-- RESULTADO -->
+        <div class="result-card" id="result-card">
+          <div class="result-header" id="result-header">
+            <div class="result-top">
+              <div>
+                <div class="result-codigo">
+                  <span id="res-icon" style="font-size:1.5rem"></span>
+                  <span class="result-codigo-txt" id="res-codigo"></span>
+                </div>
+                <div class="result-estado-lbl" id="res-estado"></div>
+              </div>
+              <div class="result-vida-big">
+                <div class="result-vida-num" id="res-vida-num"></div>
+                <div class="result-vida-sub">VIDA ÚTIL</div>
+              </div>
+            </div>
+            <div class="vida-bar-wrap">
+              <div class="vida-bar-fill" id="res-vida-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="result-body">
+            <img id="res-img" class="result-img" alt="cyrel"/>
+            <div class="damage-box" id="res-danos-box">
+              <div class="damage-title">⚠ DAÑOS DETECTADOS</div>
+              <div id="res-danos-list"></div>
+            </div>
+            <div class="zones-box" id="res-zones-box">
+              <div class="zones-title">ZONAS AFECTADAS:</div>
+              <div class="chip-wrap" id="res-zones-chips"></div>
+            </div>
+            <div class="reco-box">
+              <div class="reco-title">RECOMENDACIÓN</div>
+              <p class="reco-txt" id="res-reco"></p>
+            </div>
+            <div class="obs-box" id="res-obs-box">
+              <div class="obs-title">OBSERVACIONES GENERALES</div>
+              <p class="obs-txt" id="res-obs"></p>
+            </div>
+            <div class="urgente-box" id="res-urgente">
+              <div class="urgente-icon">🚨</div>
+              <div class="urgente-title">REEMPLAZO URGENTE</div>
+              <div class="urgente-sub" id="res-urgencia-txt"></div>
+              <div class="urgente-note">✓ Agregado a lista de reemplazo automáticamente</div>
+            </div>
+            <div class="result-fecha" id="res-fecha"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial -->
+      <div id="insp-historial" style="display:none">
+        <div id="hist-list"><div class="empty-state">No hay inspecciones aún.<br><span style="font-size:0.7rem">Ve a "Nueva Inspección" para comenzar.</span></div></div>
+      </div>
+
+      <!-- Reemplazar -->
+      <div id="insp-reemplazar" style="display:none">
+        <div id="remp-list"><div class="empty-state"><div style="font-size:2rem;margin-bottom:10px">✅</div><p style="color:#00e676;font-size:0.82rem">No hay cyreles pendientes de reemplazo</p></div></div>
+      </div>
+    </div>
+
+    <!-- ── BASE DE DATOS ── -->
+    <div class="panel" id="panel-db">
+      <div class="toolbar">
+        <input class="inp flex1" id="db-search" placeholder="🔍 Buscar código..." oninput="renderDB()"/>
+        <input class="inp w130" id="db-new" placeholder="Nuevo código" onkeydown="if(event.key==='Enter')addManual('db')"/>
+        <button class="btn" onclick="addManual('db')">+ DB</button>
+      </div>
+      <div class="sec-title" id="db-count-title">Base de Datos Cyreles</div>
+      <div id="db-list"></div>
+    </div>
+
+    <!-- ── IMPRESIÓN ── -->
+    <div class="panel" id="panel-impresion">
+      <div class="toolbar">
+        <input class="inp flex1" id="imp-search" placeholder="🔍 Buscar..." oninput="renderImp()"/>
+        <input class="inp w150" id="imp-new" placeholder="Agregar código" onkeydown="if(event.key==='Enter')addManual('impresion')"/>
+        <button class="btn yellow" onclick="addManual('impresion')">+ Imp</button>
+      </div>
+      <div class="sec-title yellow">En Impresión (<span id="imp-count">0</span>)</div>
+      <div id="imp-list"></div>
+    </div>
+
+    <!-- ── ACTUALIZAR IA ── -->
+    <div class="panel" id="panel-actualizar">
+      <div class="ai-card">
+        <div style="font-size:2.5rem;margin-bottom:9px">🤖</div>
+        <h2 style="color:#fff;font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:8px">Actualizar Inventario con IA</h2>
+        <p style="color:#556;font-size:0.73rem;line-height:1.5;margin-bottom:18px">Fotografía un listado de cyreles y la IA extraerá todos los códigos automáticamente.</p>
+        <div style="display:flex;gap:9px;justify-content:center;margin-bottom:16px">
+          <button id="target-db" class="btn" onclick="setAiTarget('db')" style="border-color:#00e5ff;background:rgba(0,229,255,0.1)">◎ Base de Datos</button>
+          <button id="target-imp" class="btn" onclick="setAiTarget('impresion')" style="border-color:#333;background:transparent;color:#556">⬡ En Impresión</button>
+        </div>
+        <input type="file" id="ai-file" accept="image/*" capture="camera" style="display:none" onchange="handleAiPhoto(this)"/>
+        <button class="photo-btn" id="ai-photo-btn" onclick="document.getElementById('ai-file').click()">
+          📷 Tomar / Subir Foto
+        </button>
+        <div id="ai-loading" style="display:none;margin-top:14px;color:#00e5ff;font-size:0.75rem">🔍 Extrayendo códigos...</div>
+        <div class="ai-result-box" id="ai-result-box">
+          <p style="color:#00e676;margin-bottom:10px;font-size:0.75rem" id="ai-result-count"></p>
+          <div class="chip-wrap" id="ai-result-chips"></div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+            <button class="btn green" onclick="applyAiResult()">✓ Aplicar</button>
+            <button class="btn red-btn" onclick="cancelAiResult()">✕ Cancelar</button>
+          </div>
+        </div>
+        <div class="error-box" id="ai-error" style="margin-top:14px"><p class="error-txt" id="ai-error-txt"></p></div>
+      </div>
+
+      <div style="background:rgba(0,229,255,0.02);border:1px solid rgba(0,229,255,0.07);border-radius:12px;padding:16px;text-align:center">
+        <p style="color:#aaa;font-size:0.75rem;margin-bottom:11px">Agregar código manualmente</p>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
+          <input class="inp" id="manual-code" placeholder="Ej: A123" style="width:120px" onkeydown="if(event.key==='Enter')addManualFromInput('db')"/>
+          <button class="btn" onclick="addManualFromInput('db')">→ Base Datos</button>
+          <button class="btn yellow" onclick="addManualFromInput('impresion')">→ Impresión</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ══ DATOS INICIALES ══════════════════════════════════════════════
+const CORRECT_PIN = "1357";
+
+let DB = [
+  "A002","A047","A055","A079","A084","A087","A116","A119","A147","A148","A158","A193","A195",
+  "A234","A241","A254","A255","A258","A268","A311","A330","A342","A359","A398","A423",
+  "A428","A513","A520","A528","A565","A623","A628","A660","A672","A682","A737","A850",
+  "A885","A887","A919","A969","A972","A977","A996",
+  "B051","B061","B142","B168","B181","B204","B206","B299","B303","B323","B324","B364",
+  "B365","B371","B400","B428","B436","B455","B484","B504","B508","B522","B544","B579",
+  "B601","B602","B621","B622","B632","B634","B637","B640","B642","B649","B659","B661",
+  "B667","B721","B739","B743","B820","B857","B891","B916","B921","B931","B957",
+  "C009","C049","C078","C081","C093","C101","C170","C233","C269","C271","C272","C274","C280",
+  "C312","C316","C328","C369","C380","C409","C422","C429","C432","C434","C435","C436",
+  "C440","C455","C456","C467","C490","C495","C497","C498","C504","C505","C512","C515",
+  "C516","C519","C520","C521","C522","C532","C539","C545"
+];
+
+let EN_IMPRESION = [
+  "A623","A885","A796","A998","A369","A185","A620","A116","A088","A124","A983",
+  "A084","A079","A300","A977","A160","A028","A148","A622","A528","A733","A513","A196",
+  "A772","A565","A241","A147","A844","A254","A119","A682","A330","A311","A268","A850",
+  "A628","A792","A371","A121","A919","A327","A352","A446","A073","A348","A144","A158",
+  "A482","A003",
+  "B743","B504","B152","B857","B508","B980","B242","B544","B898","B181","B448","B640",
+  "B642","B246","B916","B063","B621","B364","B639","B484","B661","B047","B365","B817",
+  "B204","B206","B324","B536","B323","B522","B921","B602","B436","B299","B632","B877",
+  "B622","B737","B738","B946","B132","B659","B401","B740","B352","B521","B833","B149",
+  "B236","B442","B453",
+  "C462","C522","C467","C170","C006","C432","C300","C298","C448","C551","C429","C328",
+  "C272","C360","C445","C536","C316","C560","C369","C270","C223","C532","C521","C280",
+  "C519","C233","C045","C520","C262","C370","C546","C409","C508","C326","C436",
+  "C486","C431","C506","C440","C504","C550","C455","C571","C456","C541","C546","C539",
+  "C274","C312","C269","C049","C492","C493","C177","C574","C095","C018","C003"
+];
+
+let INSPECCIONES = [];
+let PARA_REEMPLAZAR = [];
+let aiResultData = null;
+let aiTarget = "db";
+
+// ══ PIN ══════════════════════════════════════════════════════════
+let pinVal = "";
+
+function pinPress(d) {
+  if (pinVal.length >= 4) return;
+  pinVal += d;
+  updateDots();
+  if (pinVal.length === 4) {
+    if (pinVal === CORRECT_PIN) {
+      setTimeout(() => {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'flex';
+        initApp();
+      }, 200);
+    } else {
+      document.querySelectorAll('.pin-dot').forEach(d => d.classList.add('error'));
+      document.getElementById('login-card').style.animation = 'shk 0.38s ease';
+      document.getElementById('pin-error').style.display = 'block';
+      setTimeout(() => {
+        pinVal = "";
+        updateDots();
+        document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('error'));
+        document.getElementById('login-card').style.animation = '';
+        document.getElementById('pin-error').style.display = 'none';
+      }, 800);
+    }
+  }
+}
+
+function pinDel() { pinVal = pinVal.slice(0, -1); updateDots(); }
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d' + i);
+    d.classList.toggle('filled', i < pinVal.length);
+  }
+}
+
+// ══ INIT ═════════════════════════════════════════════════════════
+function initApp() {
+  renderDashboard();
+  renderDB();
+  renderImp();
+  populateInspSelect();
+}
+
+// ══ TABS ═════════════════════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'db') renderDB();
+  if (id === 'impresion') renderImp();
+}
+
+function showInspTab(id) {
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('insp-nueva').style.display = id === 'nueva' ? 'block' : 'none';
+  document.getElementById('insp-historial').style.display = id === 'historial' ? 'block' : 'none';
+  document.getElementById('insp-reemplazar').style.display = id === 'reemplazar' ? 'block' : 'none';
+  if (id === 'historial') renderHistorial();
+  if (id === 'reemplazar') renderReemplazar();
+}
+
+// ══ HELPERS ══════════════════════════════════════════════════════
+function vidaColor(p) {
+  if (p >= 70) return '#00e676';
+  if (p >= 40) return '#ffd600';
+  if (p >= 20) return '#ff9800';
+  return '#ff4444';
+}
+function estadoLabel(p) {
+  if (p >= 70) return 'BUENO';
+  if (p >= 40) return 'REGULAR';
+  if (p >= 20) return 'CRÍTICO';
+  return 'REEMPLAZAR';
+}
+function estadoIcon(p) {
+  if (p >= 70) return '✅';
+  if (p >= 40) return '⚠️';
+  if (p >= 20) return '🔴';
+  return '🚨';
+}
+
+// ══ DASHBOARD ════════════════════════════════════════════════════
+function renderDashboard() {
+  const impSet = new Set(EN_IMPRESION);
+  const total = DB.length;
+  const imp = EN_IMPRESION.length;
+  const disp = DB.filter(c => !impSet.has(c)).length;
+  const remplPendientes = PARA_REEMPLAZAR.filter(r => !r.reemplazado);
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-imp').textContent = imp;
+  document.getElementById('stat-disp').textContent = disp;
+  document.getElementById('stat-remp').textContent = remplPendientes.length;
+
+  // Header badge
+  const badge = document.getElementById('alert-badge');
+  if (remplPendientes.length > 0) {
+    badge.style.display = 'flex';
+    document.getElementById('alert-count').textContent = remplPendientes.length + ' reemplazar';
+    document.getElementById('insp-badge').style.display = 'block';
+  } else {
+    badge.style.display = 'none';
+    document.getElementById('insp-badge').style.display = 'none';
+  }
+
+  // Alert box
+  const alertBox = document.getElementById('dash-alert-box');
+  const alertChips = document.getElementById('dash-alert-chips');
+  if (remplPendientes.length > 0) {
+    alertBox.style.display = 'block';
+    alertChips.innerHTML = remplPendientes.map(r => `
+      <div class="alert-chip">
+        <span class="alert-chip-code">${r.codigo}</span>
+        <span class="alert-chip-vida">${r.vidaUtil}% vida</span>
+        <button class="btn green" style="padding:2px 8px;font-size:0.6rem" onclick="marcarReemplazado(${r.id})">✓ Listo</button>
+      </div>`).join('');
+  } else {
+    alertBox.style.display = 'none';
+  }
+
+  // Barras series
+  const bars = document.getElementById('series-bars');
+  bars.innerHTML = ['A','B','C'].map(s => {
+    const tot = DB.filter(c => c.startsWith(s)).length;
+    const i = EN_IMPRESION.filter(c => c.startsWith(s)).length;
+    const pct = tot ? Math.round((i/tot)*100) : 0;
+    const col = s==='A'?'#00e5ff':s==='B'?'#ffd600':'#00e676';
+    return `<div class="bar-row">
+      <span class="bar-label">Serie ${s}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <span class="bar-info">${i}/${tot} (${pct}%)</span>
+    </div>`;
+  }).join('');
+
+  // Últimas inspecciones
+  const lastList = document.getElementById('last-insp-list');
+  const lastTitle = document.getElementById('last-insp-title');
+  if (INSPECCIONES.length > 0) {
+    if(lastTitle) lastTitle.style.display = 'block';
+    lastList.innerHTML = INSPECCIONES.slice(0,5).map(ins => {
+      const c = vidaColor(ins.vidaUtil);
+      return `<div class="last-insp-item" style="border:1px solid ${c}33">
+        <span style="font-size:1.2rem">${estadoIcon(ins.vidaUtil)}</span>
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:0.75rem;font-weight:bold">${ins.codigo}</span>
+            <span style="color:${c};font-family:'Orbitron',sans-serif;font-size:0.7rem;font-weight:bold">${ins.vidaUtil}%</span>
+          </div>
+          <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-top:5px">
+            <div style="height:100%;border-radius:3px;width:${ins.vidaUtil}%;background:${c}"></div>
+          </div>
+          <div style="color:#556;font-size:0.6rem;margin-top:3px">${ins.fecha}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    if(lastTitle) lastTitle.style.display = 'none';
+    lastList.innerHTML = '';
+  }
+
+  // Sub-tab counts
+  document.getElementById('stab-hist').textContent = `Historial (${INSPECCIONES.length})`;
+  document.getElementById('stab-remp').textContent = `🚨 Reemplazar (${remplPendientes.length})`;
+}
+
+// ══ BASE DE DATOS ═════════════════════════════════════════════════
+function renderDB() {
+  const q = (document.getElementById('db-search')?.value || '').toLowerCase();
+  const impSet = new Set(EN_IMPRESION);
+  let html = '';
+  ['A','B','C'].forEach(s => {
+    const items = DB.filter(c => c.startsWith(s) && c.toLowerCase().includes(q));
+    if (!items.length) return;
+    html += `<div class="serie-block"><div class="serie-title cyan">SERIE ${s}</div><div class="code-wrap">`;
+    items.forEach(c => {
+      const enImp = impSet.has(c);
+      const remp = PARA_REEMPLAZAR.find(r => r.codigo===c && !r.reemplazado);
+      const lastInsp = INSPECCIONES.find(i => i.codigo===c);
+      const cls = remp ? 'red-chip' : enImp ? 'yellow-chip' : '';
+      html += `<div class="code-chip ${cls}">
+        <span class="code-txt">${c}</span>
+        ${remp ? '<span class="tag remp">🚨</span>' : ''}
+        ${lastInsp && !remp ? `<span class="tag pct" style="color:${vidaColor(lastInsp.vidaUtil)}">${lastInsp.vidaUtil}%</span>` : ''}
+        ${enImp ? '<span class="tag imp">IMP</span>' : `<button class="micro-btn" style="color:#00e5ff55" onclick="moverAImp('${c}')" title="→ Impresión">→</button>`}
+        <button class="micro-btn" style="color:#ff6b6b33" onclick="removeCode('${c}','db')">×</button>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('db-list').innerHTML = html || '<div class="empty-state">No se encontraron códigos.</div>';
+  document.getElementById('db-count-title').textContent = `Base de Datos Cyreles (${DB.filter(c=>c.toLowerCase().includes(q)).length} / ${DB.length})`;
+}
+
+// ══ IMPRESIÓN ═════════════════════════════════════════════════════
+function renderImp() {
+  const q = (document.getElementById('imp-search')?.value || '').toLowerCase();
+  let html = '';
+  ['A','B','C'].forEach(s => {
+    const items = EN_IMPRESION.filter(c => c.startsWith(s) && c.toLowerCase().includes(q));
+    if (!items.length) return;
+    html += `<div class="serie-block"><div class="serie-title yellow">SERIE ${s}</div><div class="code-wrap">`;
+    items.forEach(c => {
+      const inDb = DB.includes(c);
+      const remp = PARA_REEMPLAZAR.find(r => r.codigo===c && !r.reemplazado);
+      const lastInsp = INSPECCIONES.find(i => i.codigo===c);
+      const cls = remp ? 'red-chip' : 'yellow-chip';
+      html += `<div class="code-chip ${cls}">
+        <span class="code-txt">${c}</span>
+        ${remp ? '<span class="tag remp">🚨</span>' : ''}
+        ${lastInsp ? `<span class="tag pct" style="color:${vidaColor(lastInsp.vidaUtil)}">${lastInsp.vidaUtil}%</span>` : ''}
+        ${!inDb ? '<span class="tag nodb">NO-DB</span>' : ''}
+        <button class="micro-btn" style="color:#00e67655" onclick="moverABodega('${c}')" title="← Bodega">←</button>
+        <button class="micro-btn" style="color:#ff6b6b33" onclick="removeCode('${c}','impresion')">×</button>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('imp-list').innerHTML = html || '<div class="empty-state">No hay cyreles en impresión.</div>';
+  document.getElementById('imp-count').textContent = EN_IMPRESION.filter(c=>c.toLowerCase().includes(q)).length;
+}
+
+// ══ CRUD ══════════════════════════════════════════════════════════
+function addManual(target) {
+  const inp = document.getElementById(target==='db'?'db-new':'imp-new');
+  const code = (inp.value||'').toUpperCase().trim();
+  if (!code) return;
+  if (target==='db') { DB = [...new Set([...DB, code])].sort(); renderDB(); }
+  else { EN_IMPRESION = [...new Set([...EN_IMPRESION, code])].sort(); renderImp(); }
+  inp.value = '';
+  renderDashboard();
+  populateInspSelect();
+}
+
+function addManualFromInput(target) {
+  const inp = document.getElementById('manual-code');
+  const code = (inp.value||'').toUpperCase().trim();
+  if (!code) return;
+  if (target==='db') { DB = [...new Set([...DB, code])].sort(); }
+  else { EN_IMPRESION = [...new Set([...EN_IMPRESION, code])].sort(); }
+  inp.value = '';
+  renderDashboard(); renderDB(); renderImp(); populateInspSelect();
+}
+
+function removeCode(code, from) {
+  if (from==='db') { DB = DB.filter(c=>c!==code); renderDB(); }
+  else { EN_IMPRESION = EN_IMPRESION.filter(c=>c!==code); renderImp(); }
+  renderDashboard();
+}
+
+function moverAImp(code) {
+  EN_IMPRESION = [...new Set([...EN_IMPRESION, code])].sort();
+  renderDB(); renderImp(); renderDashboard();
+}
+
+function moverABodega(code) {
+  EN_IMPRESION = EN_IMPRESION.filter(c=>c!==code);
+  renderImp(); renderDB(); renderDashboard();
+}
+
+function marcarReemplazado(id) {
+  PARA_REEMPLAZAR = PARA_REEMPLAZAR.map(r => r.id===id ? {...r, reemplazado:true} : r);
+  INSPECCIONES = INSPECCIONES.map(i => i.id===id ? {...i, reemplazado:true} : i);
+  renderDashboard(); renderHistorial(); renderReemplazar(); renderDB(); renderImp();
+}
+
+// ══ INSPECCIÓN ════════════════════════════════════════════════════
+function populateInspSelect() {
+  const sel = document.getElementById('insp-select');
+  const imp = EN_IMPRESION.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const db = DB.map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.innerHTML = `<option value="">-- Lista --</option>
+    <optgroup label="En Impresión">${imp}</optgroup>
+    <optgroup label="Base de Datos">${db}</optgroup>`;
+}
+
+async function handleInspPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const codigo = (document.getElementById('insp-code').value||'').trim().toUpperCase() || 'SIN CÓDIGO';
+  const previewUrl = URL.createObjectURL(file);
+
+  document.getElementById('insp-loading').style.display = 'block';
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('insp-error').style.display = 'none';
+  document.getElementById('insp-btn').disabled = true;
+  document.getElementById('insp-btn').textContent = '⬡ Analizando...';
+
+  try {
+    const b64 = await toBase64(file);
+    const prompt = `Eres un experto en cilindros fotopolímeros para impresión flexográfica (cyreles/anilox).
+Analiza esta imagen del cyrel con código: ${codigo}
+
+Evalúa visualmente el estado del RELIEVE (grabado fotopolímero) del cilindro:
+1. DAÑOS EN RELIEVE: rayones, desgaste, fisuras, partes rotas, suciedad incrustada, corrosión, áreas sin grabado, bordes dañados.
+2. VIDA ÚTIL ESTIMADA: qué porcentaje de vida útil le queda (0-100%).
+3. DIAGNÓSTICO: describe los daños específicos que ves.
+4. RECOMENDACIÓN: qué acción tomar.
+5. URGENCIA DE REEMPLAZO: si debe reemplazarse y por qué.
+
+Responde SOLO con este JSON sin backticks ni texto adicional:
+{"codigo":"${codigo}","vidaUtil":75,"estado":"BUENO","danos":["daño 1","daño 2"],"zonasDanadas":["zona 1"],"recomendacion":"texto","reemplazar":false,"urgencia":"NORMAL","observaciones":"texto"}
+
+Si la imagen NO muestra claramente un cyrel/cilindro, responde: {"vidaUtil":-1}`;
+
+    const resp = await callClaude([{
+      role:'user',
+      content:[
+        {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
+        {type:'text',text:prompt}
+      ]
+    }]);
+
+    const parsed = JSON.parse(resp.replace(/```json|```/g,'').trim());
+
+    if (parsed.vidaUtil === -1) {
+      showError('insp', 'La imagen no muestra claramente un cyrel. Toma la foto más cerca del relieve del cilindro.');
+    } else {
+      const resultado = {
+        ...parsed,
+        fecha: new Date().toLocaleString('es-CO'),
+        imagen: previewUrl,
+        id: Date.now()
+      };
+      INSPECCIONES = [resultado, ...INSPECCIONES].slice(0,50);
+      if (parsed.reemplazar && parsed.codigo !== 'SIN CÓDIGO') {
+        const idx = PARA_REEMPLAZAR.findIndex(r=>r.codigo===parsed.codigo);
+        if (idx >= 0) PARA_REEMPLAZAR[idx] = resultado;
+        else PARA_REEMPLAZAR = [resultado, ...PARA_REEMPLAZAR];
+      }
+      showInspResult(resultado);
+      renderDashboard(); renderDB(); renderImp();
+    }
+  } catch(e) {
+    showError('insp', 'Error al analizar la imagen. Verifica tu conexión e intenta de nuevo.');
+  }
+
+  document.getElementById('insp-loading').style.display = 'none';
+  document.getElementById('insp-btn').disabled = false;
+  document.getElementById('insp-btn').innerHTML = '<span style="font-size:1.3rem">📸</span> Fotografiar Cyrel';
+  input.value = '';
+}
+
+function showInspResult(r) {
+  const col = vidaColor(r.vidaUtil);
+  const card = document.getElementById('result-card');
+  card.style.display = 'block';
+  card.style.border = `2px solid ${col}44`;
+
+  const hdr = document.getElementById('result-header');
+  hdr.style.background = `linear-gradient(135deg, ${col}22, transparent)`;
+  hdr.style.borderBottom = `1px solid ${col}33`;
+
+  document.getElementById('res-icon').textContent = estadoIcon(r.vidaUtil);
+  document.getElementById('res-codigo').textContent = r.codigo;
+  document.getElementById('res-estado').textContent = estadoLabel(r.vidaUtil);
+  document.getElementById('res-estado').style.color = col;
+  document.getElementById('res-vida-num').textContent = r.vidaUtil + '%';
+  document.getElementById('res-vida-num').style.color = col;
+  const bar = document.getElementById('res-vida-bar');
+  bar.style.width = r.vidaUtil + '%';
+  bar.style.background = `linear-gradient(90deg, ${col}, ${col}aa)`;
+  bar.style.boxShadow = `0 0 12px ${col}88`;
+
+  const img = document.getElementById('res-img');
+  if (r.imagen) { img.src = r.imagen; img.style.display = 'block'; img.style.borderColor = `${col}33`; }
+
+  // Daños
+  const danosBox = document.getElementById('res-danos-box');
+  if (r.danos && r.danos.length) {
+    danosBox.style.display = 'block';
+    document.getElementById('res-danos-list').innerHTML = r.danos.map(d =>
+      `<div class="damage-item"><span class="damage-bullet">•</span><span class="damage-txt">${d}</span></div>`
+    ).join('');
+  } else danosBox.style.display = 'none';
+
+  // Zonas
+  const zonesBox = document.getElementById('res-zones-box');
+  if (r.zonasDanadas && r.zonasDanadas.length) {
+    zonesBox.style.display = 'block';
+    document.getElementById('res-zones-chips').innerHTML = r.zonasDanadas.map(z =>
+      `<span class="chip" style="border-color:rgba(255,152,0,0.3);background:rgba(255,152,0,0.12);color:#ff9800">${z}</span>`
+    ).join('');
+  } else zonesBox.style.display = 'none';
+
+  document.getElementById('res-reco').textContent = r.recomendacion || '';
+
+  // Observaciones
+  const obsBox = document.getElementById('res-obs-box');
+  if (r.observaciones) { obsBox.style.display = 'block'; document.getElementById('res-obs').textContent = r.observaciones; }
+  else obsBox.style.display = 'none';
+
+  // Urgente
+  const urgenteBox = document.getElementById('res-urgente');
+  if (r.reemplazar) {
+    urgenteBox.style.display = 'block';
+    document.getElementById('res-urgencia-txt').textContent = 'Urgencia: ' + r.urgencia;
+  } else urgenteBox.style.display = 'none';
+
+  document.getElementById('res-fecha').textContent = r.fecha;
+  card.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderHistorial() {
+  const el = document.getElementById('hist-list');
+  if (!INSPECCIONES.length) {
+    el.innerHTML = '<div class="empty-state">No hay inspecciones registradas aún.<br><span style="font-size:0.7rem">Ve a "Nueva Inspección" para comenzar.</span></div>';
+    return;
+  }
+  el.innerHTML = INSPECCIONES.map(ins => {
+    const c = vidaColor(ins.vidaUtil);
+    return `<div class="hist-item" style="border:1px solid ${c}33">
+      ${ins.imagen ? `<img src="${ins.imagen}" class="hist-img" style="border:1px solid ${c}44"/>` : ''}
+      <div class="hist-info">
+        <div class="hist-top">
+          <span class="hist-code">${ins.codigo}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="hist-vida" style="color:${c}">${ins.vidaUtil}%</span>
+            <span style="font-size:1rem">${estadoIcon(ins.vidaUtil)}</span>
+          </div>
+        </div>
+        <div class="hist-bar"><div class="hist-bar-fill" style="width:${ins.vidaUtil}%;background:${c}"></div></div>
+        <div style="color:${c};font-size:0.6rem;letter-spacing:1px;margin-bottom:3px">${estadoLabel(ins.vidaUtil)}</div>
+        ${ins.danos?.length ? `<div style="color:#667;font-size:0.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ins.danos[0]}</div>` : ''}
+        <div class="hist-fecha">${ins.fecha}</div>
+        ${ins.reemplazado ? '<span style="display:inline-block;margin-top:4px;padding:1px 7px;border-radius:4px;background:rgba(0,230,118,0.12);color:#00e676;font-size:0.58rem">✓ REEMPLAZADO</span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderReemplazar() {
+  const pendientes = PARA_REEMPLAZAR.filter(r => !r.reemplazado);
+  const el = document.getElementById('remp-list');
+  if (!pendientes.length) {
+    el.innerHTML = '<div class="empty-state"><div style="font-size:2rem;margin-bottom:10px">✅</div><p style="color:#00e676;font-size:0.82rem">No hay cyreles pendientes de reemplazo</p></div>';
+    return;
+  }
+  el.innerHTML = pendientes.map(r => `
+    <div class="remp-item">
+      <div class="remp-header">
+        <div class="remp-top">
+          <div>
+            <div class="remp-code-wrap"><span style="font-size:1.2rem">🚨</span><span class="remp-code">${r.codigo}</span></div>
+            <div class="remp-urgencia">REEMPLAZO ${r.urgencia}</div>
+          </div>
+          <div class="remp-vida-big">
+            <div class="remp-vida-num">${r.vidaUtil}%</div>
+            <div class="remp-vida-sub">vida útil</div>
+          </div>
+        </div>
+        <div class="remp-bar"><div class="remp-bar-fill" style="width:${r.vidaUtil}%"></div></div>
+        <div class="remp-danos">
+          ${(r.danos||[]).map(d=>`<div style="display:flex;gap:5px;margin-bottom:3px"><span style="color:#ff6b6b;font-size:0.65rem">•</span><span style="color:#cc7777;font-size:0.65rem;line-height:1.4">${d}</span></div>`).join('')}
+        </div>
+        <div class="remp-footer">
+          <span class="remp-fecha">${r.fecha}</span>
+          <button class="btn green" onclick="marcarReemplazado(${r.id})">✓ Marcar Reemplazado</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══ ACTUALIZAR CON IA ═════════════════════════════════════════════
+function setAiTarget(t) {
+  aiTarget = t;
+  document.getElementById('target-db').style.cssText = t==='db'
+    ? 'border-color:#00e5ff;background:rgba(0,229,255,0.1);color:#00e5ff'
+    : 'border-color:#333;background:transparent;color:#556';
+  document.getElementById('target-imp').style.cssText = t==='impresion'
+    ? 'border-color:#ffd600;background:rgba(255,214,0,0.1);color:#ffd600'
+    : 'border-color:#333;background:transparent;color:#556';
+}
+
+async function handleAiPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('ai-loading').style.display = 'block';
+  document.getElementById('ai-result-box').style.display = 'none';
+  document.getElementById('ai-error').style.display = 'none';
+  document.getElementById('ai-photo-btn').disabled = true;
+  try {
+    const b64 = await toBase64(file);
+    const prompt = `Analiza esta imagen de una lista de códigos de cyreles (cilindros de impresión flexográfica).
+Extrae TODOS los códigos. Formato: letra (A,B,C) + 2-4 dígitos. Ej: A002, B504, C440.
+Incluye resaltados en amarillo y escritos a mano.
+Responde SOLO JSON sin backticks: {"codigos":["A002","B504",...]}`;
+    const resp = await callClaude([{
+      role:'user',
+      content:[
+        {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
+        {type:'text',text:prompt}
+      ]
+    }]);
+    const parsed = JSON.parse(resp.replace(/```json|```/g,'').trim());
+    aiResultData = (parsed.codigos||[]).map(c=>c.toUpperCase().trim());
+    document.getElementById('ai-result-count').textContent = `✓ ${aiResultData.length} códigos detectados`;
+    document.getElementById('ai-result-chips').innerHTML = aiResultData.map(c=>`<span class="chip green">${c}</span>`).join('');
+    document.getElementById('ai-result-box').style.display = 'block';
+  } catch {
+    showError('ai', 'No se pudo analizar la imagen. Intenta con foto más nítida.');
+  }
+  document.getElementById('ai-loading').style.display = 'none';
+  document.getElementById('ai-photo-btn').disabled = false;
+  input.value = '';
+}
+
+function applyAiResult() {
+  if (!aiResultData) return;
+  if (aiTarget==='db') DB = [...new Set([...DB,...aiResultData])].sort();
+  else EN_IMPRESION = [...new Set([...EN_IMPRESION,...aiResultData])].sort();
+  aiResultData = null;
+  document.getElementById('ai-result-box').style.display = 'none';
+  renderDashboard(); renderDB(); renderImp(); populateInspSelect();
+}
+
+function cancelAiResult() {
+  aiResultData = null;
+  document.getElementById('ai-result-box').style.display = 'none';
+}
+
+// ══ UTILIDADES ════════════════════════════════════════════════════
+function showError(prefix, msg) {
+  document.getElementById(prefix+'-error').style.display = 'block';
+  document.getElementById(prefix+'-error-txt').textContent = msg;
+}
+
+function toBase64(file) {
+  return new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ══ PEGA AQUI TU API KEY DE GOOGLE AI STUDIO ══════════════════
+// Obten tu key GRATIS en: https://aistudio.google.com
+const GEMINI_API_KEY = AIzaSyBpP4F2j6m8iIUwOyQck2SeGj65Zf_YiHg 
+// ═══════════════════════════════════════════════════════════════
+
+async function callClaude(messages) {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.includes('PEGA-TU-CLAVE')) {
+    alert('Falta la API Key de Google.\nAbre index.html y pega tu clave donde dice PEGA-TU-CLAVE-AQUI');
+    throw new Error('API Key no configurada');
+  }
+
+  // Construir parts para Gemini
+  const parts = [];
+  for (const msg of messages) {
+    if (Array.isArray(msg.content)) {
+      for (const c of msg.content) {
+        if (c.type === 'text') {
+          parts.push({ text: c.text });
+        } else if (c.type === 'image') {
+          parts.push({ inlineData: { mimeType: c.source.media_type, data: c.source.data } });
+        }
+      }
+    } else {
+      parts.push({ text: msg.content });
+    }
+  }
+
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_API_KEY;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts }],
+      generationConfig: { maxOutputTokens: 1000, temperature: 0.2 }
+    })
+  });
+
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+}
+</script>
+</body>
+</html>
