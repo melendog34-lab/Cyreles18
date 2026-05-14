@@ -632,13 +632,13 @@ function renderDashboard() {
   const remplPendientes = PARA_REEMPLAZAR.filter(r => !r.reemplazado);
 
   document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-imp').textContent = imp;
-  document.getElementById('stat-disp').textContent = disp;
-  document.getElementById('stat-remp').textContent = remplPendientes.length;
-
-  // Header badge
-  const badge = document.getElementById('alert-badge');
-  if (remplPendientes.length > 0) {
+    document.getElementById('stat-imp').textContent = imp;
+      document.getElementById('stat-disp').textContent = disp;
+        document.getElementById('stat-remp').textContent = remplPendientes.length;
+        
+          // Header badge
+            const badge = document.getElementById('alert-badge');
+              if (remplPendientes.length > 0) {
     badge.style.display = 'flex';
     document.getElementById('alert-count').textContent = remplPendientes.length + ' reemplazar';
     document.getElementById('insp-badge').style.display = 'block';
@@ -1079,7 +1079,7 @@ function toBase64(file) {
 
 // ══ PEGA AQUI TU API KEY DE GOOGLE AI STUDIO ══════════════════
 // Obten tu key GRATIS en: https://aistudio.google.com
-const GEMINI_API_KEY = 'PEGA-TU-CLAVE-AQUI';
+const GEMINI_API_KEY = AIzaSyBpP4F2j6m8iIUwOyQck2SeGj65Zf_YiHg
 // ═══════════════════════════════════════════════════════════════
 
 async function callClaude(messages) {
